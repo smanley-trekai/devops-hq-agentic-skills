@@ -27,7 +27,7 @@
 
 - [The stack at a glance](#the-stack-at-a-glance)
 - [Why use these instead of a default agent setup](#why-use-these-instead-of-a-default-agent-setup)
-- [Prerequisites](#prerequisites)
+- [Prerequisites](#prerequisites): tools each skill needs
 - [Setup](#setup)
   - [Quick install (all at once)](#quick-install-all-at-once)
   - [1. Terraform Skill](#1-terraform-skill-anton-babenko)
@@ -97,16 +97,111 @@ A fresh Claude Code, Codex or Cursor install is a capable generalist. But it onl
 
 ## Prerequisites
 
-| Tool | Needed for | Install |
+Skills are instructions, not programs. A skill tells your agent *which* tools to run, so those tools must already be installed on your machine. Otherwise the agent stops or guesses.
+
+- **Required:** the skill can't do its job without it.
+- **Recommended:** the skill calls it when it's present (linting, scanning, tests), and you get better results.
+
+Run `./scripts/install.sh check` to see what's missing on your machine.
+
+### Common to all
+
+| Tool | Why | Install (macOS) |
 |---|---|---|
-| Node.js 18+ (`npx`) | Skills CLI (skills 1–3 and 7–8, optional Miro skills) | `brew install node` |
-| Python 3.10+ and `uv` (or `pipx`) | Graphify | `brew install uv` |
-| Homebrew (macOS) | BrowserOS neo | [brew.sh](https://brew.sh) |
-| Terraform or OpenTofu | Running what the Terraform skills generate | `brew install hashicorp/tap/terraform` |
-| An AI coding agent | Everything | Claude Code, Codex, Cursor, Gemini CLI… |
-| A Miro account | Miro AI | [miro.com](https://miro.com) |
-| GitHub CLI, authenticated | GH Fix CI, GH Address Comments | `brew install gh && gh auth login` |
-| A GitHub personal access token | GitHub MCP Server | [Create a fine-grained PAT](https://github.com/settings/personal-access-tokens/new) |
+| An AI coding agent | Runs the skills | Claude Code, Codex, Cursor, Gemini CLI… |
+| Node.js 18+ (`npx`) | Skills CLI that installs skills 1–3 and 7–8, plus the optional Miro skills | `brew install node` |
+| Git | Every repo workflow | `xcode-select --install` or `brew install git` |
+
+### 1. Terraform Skill
+
+| Tool | Status | Why | Install (macOS) |
+|---|---|---|---|
+| `terraform` **or** `tofu` | **Required** | `fmt`, `validate`, `plan`, `test`, state commands | `brew tap hashicorp/tap && brew install hashicorp/tap/terraform` or `brew install opentofu` |
+| `tflint` | Recommended | Lint step in its pre-commit validation flow | `brew install tflint` |
+| `trivy` | Recommended | `trivy config .` security scan | `brew install trivy` |
+| `checkov` | Recommended | `checkov -d .` policy and compliance scan | `brew install checkov` |
+| `pre-commit` | Optional | Runs fmt, validate, lint and scan on every commit | `brew install pre-commit` |
+| Go | Optional | Only for Terratest integration tests | `brew install go` |
+| Cloud CLI + credentials (`aws`, `gcloud`, `az`) | Required for `plan`/`apply` against real infra | Provider authentication | `brew install awscli` · `brew install --cask google-cloud-sdk` · `brew install azure-cli` |
+
+> Version guide: Terraform **1.6+** (or any OpenTofu) for native `terraform test`, and **1.10+** for S3 native state locking (`use_lockfile`). The skill checks your version before using version-gated features.
+
+### 2. Terraform Code Generation
+
+| Tool | Status | Why | Install (macOS) |
+|---|---|---|---|
+| `terraform` **or** `tofu` | **Required** | Runs `terraform fmt` and `terraform validate` on what it generates | see above |
+| `tflint` | Recommended | Linting and best practices | `brew install tflint` |
+| `checkov` or `trivy` | Recommended | Security scanning (the skill also mentions `tfsec`, which is now part of `trivy`) | `brew install checkov` / `brew install trivy` |
+
+### 3. Terraform Module Generation
+
+| Tool | Status | Why | Install (macOS) |
+|---|---|---|---|
+| `terraform` **or** `tofu` | **Required** | `state list`, `show -json`, `plan`, `test`, `moved` blocks | see above |
+| `jq` | **Required** | Reads `terraform show -json` while mapping state | `brew install jq` |
+| Initialized backend + credentials | **Required** | `terraform init` must succeed so state can be inspected and migrated | your backend and cloud CLI |
+
+> Version guide: `moved` blocks need Terraform **1.1+**. `.tftest.hcl` tests need **1.6+**, and mock providers need **1.7+**. The module README template the skill generates requires **>= 1.5**.
+
+### 4. Graphify
+
+| Tool | Status | Why | Install (macOS) |
+|---|---|---|---|
+| Python **3.10+** | **Required** | Graphify is a Python CLI | `brew install python` |
+| `uv` (or `pipx`) | **Required** | Installs the `graphifyy` package as a standalone tool | `brew install uv` |
+| Model access | Optional | Only for the semantic pass over docs, PDFs, images and video. Uses your assistant's model or a configured API key. Code parsing needs none. | — |
+
+### 5. BrowserOS neo
+
+| Tool | Status | Why | Install (macOS) |
+|---|---|---|---|
+| BrowserOS neo app | **Required** | The browser the agent drives | `brew tap browseros-ai/tap && brew install --cask browseros-neo` |
+| An MCP-capable agent | **Required** | Connects to BrowserOS over MCP on `127.0.0.1` | Claude Code, Codex, Cursor, VS Code… |
+| Google Chrome | Optional | Source for the one-click import of logins, bookmarks and extensions | — |
+
+### 6. Miro AI
+
+| Tool | Status | Why | Install |
+|---|---|---|---|
+| A Miro account | **Required** | OAuth access to your boards | [miro.com](https://miro.com) |
+| Claude Code, Gemini CLI, or any MCP client | **Required** | Hosts the plugin, extension or MCP server | — |
+| A web browser | **Required** | Completes the Miro OAuth login the first time | — |
+
+### 7. GH Fix CI
+
+| Tool | Status | Why | Install (macOS) |
+|---|---|---|---|
+| GitHub CLI (`gh`) | **Required** | Reads PR checks and GitHub Actions logs | `brew install gh` |
+| `gh` login with `repo` + `workflow` scopes | **Required** | Access to checks and workflow logs | `gh auth login` (then `gh auth status`) |
+| Python 3 | **Required** | Runs the skill's `scripts/inspect_pr_checks.py` | `brew install python` |
+
+> The skill runs `python …`. macOS ships only `python3`, so if the agent reports `python: command not found`, it should use `python3`. You can also add `alias python=python3` to your shell profile.
+
+### 8. GH Address Comments
+
+| Tool | Status | Why | Install (macOS) |
+|---|---|---|---|
+| GitHub CLI (`gh`) | **Required** | Fetches PR comments and review threads | `brew install gh` |
+| `gh` login with `repo` scope | **Required** | Read access to PR review threads | `gh auth login` |
+| Python 3 | **Required** | Runs the skill's `scripts/fetch_comments.py` | `brew install python` |
+| An open PR for your current branch | **Required** | The skill works on the PR linked to the checked-out branch | `gh pr create` |
+
+### 9. GitHub MCP Server
+
+| Tool | Status | Why | Install |
+|---|---|---|---|
+| GitHub personal access token | **Required** | Authenticates the remote server (use a fine-grained token) | [Create a PAT](https://github.com/settings/personal-access-tokens/new) |
+| An MCP client with remote HTTP support | **Required** | Connects to `https://api.githubcopilot.com/mcp` | Claude Code 2.1.1+ for `claude mcp add-json` |
+| Docker | Optional | Only for the local, self-hosted server (for example, GitHub Enterprise Server) | `brew install --cask docker` |
+
+### Install everything at once (macOS)
+
+```bash
+brew tap hashicorp/tap
+brew install node git gh jq uv python hashicorp/tap/terraform tflint trivy checkov pre-commit
+gh auth login   # choose the repo and workflow scopes
+```
 
 ## Setup
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Install the TrekAI DevOps agentic skill stack.
-# Usage: ./scripts/install.sh [all|terraform|github|graphify|browseros|miro]
+# Usage: ./scripts/install.sh [all|check|terraform|github|graphify|browseros|miro]
 set -euo pipefail
 
 target="${1:-all}"
@@ -70,6 +70,44 @@ install_github() {
 EOF
 }
 
+check_tools() {
+  local missing=0
+  row() { # row <label> <status> <cmd...>  (any listed command counts)
+    local label="$1" status="$2"; shift 2
+    local c found=""
+    for c in "$@"; do need "$c" && { found="$c"; break; }; done
+    if [[ -n "$found" ]]; then
+      printf '  \033[1;32mok\033[0m       %-28s (%s)\n' "$label" "$found"
+    elif [[ "$status" == required ]]; then
+      printf '  \033[1;31mMISSING\033[0m  %-28s required\n' "$label"; missing=$((missing+1))
+    else
+      printf '  \033[1;33mmissing\033[0m  %-28s %s\n' "$label" "$status"
+    fi
+  }
+  info "Common";              row "node / npx" required npx; row "git" required git
+  info "Terraform skills";    row "terraform or tofu" required terraform tofu; row "jq" required jq
+                              row "tflint" recommended tflint; row "trivy" recommended trivy
+                              row "checkov" recommended checkov; row "pre-commit" optional pre-commit
+                              row "go (Terratest)" optional go
+  info "Graphify";            row "python3" required python3; row "uv or pipx" required uv pipx
+                              row "graphify CLI" "not installed yet" graphify
+  info "GitHub skills";       row "gh" required gh
+  if need gh; then
+    if gh auth status >/dev/null 2>&1; then printf '  \033[1;32mok\033[0m       %-28s\n' "gh logged in"
+    else printf '  \033[1;31mMISSING\033[0m  %-28s run: gh auth login\n' "gh logged in"; missing=$((missing+1)); fi
+  fi
+  row "python (alias for python3)" "optional: GH Fix CI runs 'python'" python
+  info "GitHub MCP / agents"; row "claude CLI" optional claude; row "docker (local MCP)" optional docker
+  info "BrowserOS neo"
+  if [[ -d "/Applications/BrowserOS neo.app" ]] || { need brew && brew list --cask browseros-neo >/dev/null 2>&1; }; then
+    printf '  \033[1;32mok\033[0m       %-28s\n' "BrowserOS neo app"
+  else
+    printf '  \033[1;33mmissing\033[0m  %-28s run: ./scripts/install.sh browseros\n' "BrowserOS neo app"
+  fi
+  echo
+  if (( missing > 0 )); then warn "$missing required tool(s) missing. See the README's Prerequisites section."; else info "All required tools found."; fi
+}
+
 show_miro() {
   info "Miro AI: run these inside Claude Code, then restart it:"
   cat <<'EOF'
@@ -80,6 +118,7 @@ EOF
 }
 
 case "$target" in
+  check)     check_tools; exit 0 ;;
   terraform) install_terraform ;;
   github)    install_github ;;
   graphify)  install_graphify ;;
@@ -92,7 +131,7 @@ case "$target" in
     install_browseros || warn "BrowserOS neo skipped"
     show_miro
     ;;
-  *) echo "Usage: $0 [all|terraform|github|graphify|browseros|miro]" >&2; exit 2 ;;
+  *) echo "Usage: $0 [all|check|terraform|github|graphify|browseros|miro]" >&2; exit 2 ;;
 esac
 
 info "Done. See README.md, section 'Verify your setup'."
