@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Install the TrekAI DevOps agentic skill stack.
-# Usage: ./scripts/install.sh [all|terraform|graphify|browseros|miro]
+# Usage: ./scripts/install.sh [all|terraform|github|graphify|browseros|miro]
 set -euo pipefail
 
 target="${1:-all}"
@@ -47,6 +47,29 @@ install_browseros() {
   fi
 }
 
+install_github() {
+  if ! need npx; then
+    warn "npx not found. Install Node.js 18+ (brew install node) and re-run."
+    return 1
+  fi
+  info "Installing GH Fix CI (openai)"
+  npx -y skills add openai/skills@gh-fix-ci
+  info "Installing GH Address Comments (openai)"
+  npx -y skills add openai/skills@gh-address-comments
+  if ! need gh; then
+    warn "GitHub CLI not found. Install it (brew install gh), then run: gh auth login"
+  elif ! gh auth status >/dev/null 2>&1; then
+    warn "GitHub CLI isn't logged in. Run: gh auth login  (grant the repo and workflow scopes)"
+  fi
+  info "GitHub MCP Server: create a fine-grained PAT, then run in your terminal:"
+  cat <<'EOF'
+    read -rs GITHUB_PAT
+    claude mcp add-json github --scope user \
+      '{"type":"http","url":"https://api.githubcopilot.com/mcp","headers":{"Authorization":"Bearer '"$GITHUB_PAT"'"}}'
+    unset GITHUB_PAT
+EOF
+}
+
 show_miro() {
   info "Miro AI: run these inside Claude Code, then restart it:"
   cat <<'EOF'
@@ -58,16 +81,18 @@ EOF
 
 case "$target" in
   terraform) install_terraform ;;
+  github)    install_github ;;
   graphify)  install_graphify ;;
   browseros) install_browseros ;;
   miro)      show_miro ;;
   all)
     install_terraform || warn "Terraform skills skipped"
+    install_github    || warn "GitHub skills skipped"
     install_graphify  || warn "Graphify skipped"
     install_browseros || warn "BrowserOS neo skipped"
     show_miro
     ;;
-  *) echo "Usage: $0 [all|terraform|graphify|browseros|miro]" >&2; exit 2 ;;
+  *) echo "Usage: $0 [all|terraform|github|graphify|browseros|miro]" >&2; exit 2 ;;
 esac
 
 info "Done. See README.md, section 'Verify your setup'."

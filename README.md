@@ -11,11 +11,11 @@
 
 <p align="center">
   <b>The agent skills and tools the TrekAI DevOps team uses every day.</b><br>
-  <sub>Terraform · Codebase knowledge graphs · Browser automation · Miro diagrams</sub>
+  <sub>Terraform · Codebase knowledge graphs · Browser automation · Miro diagrams · GitHub PRs &amp; CI</sub>
 </p>
 
 <p align="center">
-  <img src="assets/icons/terraform.svg" height="48" alt="Terraform">&nbsp;&nbsp;&nbsp;<img src="assets/icons/graphify.svg" height="48" alt="Graphify">&nbsp;&nbsp;&nbsp;<img src="assets/icons/browseros-neo.png" height="48" alt="BrowserOS neo">&nbsp;&nbsp;&nbsp;<img src="assets/icons/miro.png" height="48" alt="Miro">
+  <img src="assets/icons/terraform.svg" height="48" alt="Terraform">&nbsp;&nbsp;&nbsp;<img src="assets/icons/graphify.svg" height="48" alt="Graphify">&nbsp;&nbsp;&nbsp;<img src="assets/icons/browseros-neo.png" height="48" alt="BrowserOS neo">&nbsp;&nbsp;&nbsp;<img src="assets/icons/miro.png" height="48" alt="Miro">&nbsp;&nbsp;&nbsp;<picture><source media="(prefers-color-scheme: dark)" srcset="assets/icons/github-light.svg"><img src="assets/icons/github.svg" height="48" alt="GitHub"></picture>
 </p>
 
 ---
@@ -36,6 +36,9 @@
   - [4. Graphify](#4-graphify)
   - [5. BrowserOS neo](#5-browseros-neo)
   - [6. Miro AI](#6-miro-ai)
+  - [7. GH Fix CI](#7-gh-fix-ci-openai)
+  - [8. GH Address Comments](#8-gh-address-comments-openai)
+  - [9. GitHub MCP Server](#9-github-mcp-server)
 - [How to use them together](#how-to-use-them-together)
 - [Verify your setup](#verify-your-setup)
 - [Updating and removing](#updating-and-removing)
@@ -50,6 +53,9 @@
 | 4 | <img src="assets/icons/graphify.svg" width="20" align="center" alt="Graphify"> | **Graphify** | Skill + CLI | Maps a whole repo (code, docs, configs, schemas, PDFs) into a knowledge graph. The agent queries the graph instead of grepping through files. | [Graphify-Labs/graphify](https://github.com/Graphify-Labs/graphify) |
 | 5 | <img src="assets/icons/browseros-neo.png" width="20" align="center" alt="BrowserOS neo"> | **BrowserOS neo** | Agentic browser (MCP) | A separate local browser for agents, already signed into your accounts. Agents can work in cloud consoles, dashboards and internal tools. | [browseros-ai/BrowserOS](https://github.com/browseros-ai/BrowserOS) |
 | 6 | <img src="assets/icons/miro.png" width="20" align="center" alt="Miro"> | **Miro AI** | Plugin + MCP + skills | Lets the agent read and write Miro boards: architecture diagrams, runbooks, specs and code reviews on a board. | [miroapp/miro-ai](https://github.com/miroapp/miro-ai) |
+| 7 | <picture><source media="(prefers-color-scheme: dark)" srcset="assets/icons/github-light.svg"><img src="assets/icons/github.svg" width="20" align="center" alt="GitHub"></picture> | **GH Fix CI** | Agent skill | Finds failing GitHub Actions checks on a PR, reads the logs, and proposes a fix for approval before changing anything. | [agenticskills.io](https://agenticskills.io/skills/gh-fix-ci) · [openai/skills](https://github.com/openai/skills/tree/main/skills/.curated/gh-fix-ci) |
+| 8 | <picture><source media="(prefers-color-scheme: dark)" srcset="assets/icons/github-light.svg"><img src="assets/icons/github.svg" width="20" align="center" alt="GitHub"></picture> | **GH Address Comments** | Agent skill | Pulls the review comments on the current branch's PR, lists them, and fixes only the ones you pick. | [agenticskills.io](https://agenticskills.io/skills/gh-address-comments) · [openai/skills](https://github.com/openai/skills/tree/main/skills/.curated/gh-address-comments) |
+| 9 | <picture><source media="(prefers-color-scheme: dark)" srcset="assets/icons/github-light.svg"><img src="assets/icons/github.svg" width="20" align="center" alt="GitHub"></picture> | **GitHub MCP Server** | MCP server (official) | Gives the agent structured access to GitHub repos, issues, PRs, Actions, code search and security alerts. | [github/github-mcp-server](https://github.com/github/github-mcp-server) |
 
 ## Why use these instead of a default agent setup
 
@@ -67,6 +73,9 @@ A fresh Claude Code, Codex or Cursor install is a capable generalist. But it onl
 | Has no memory of the repo between sessions | Re-learns the same architecture in every conversation | **Graphify** keeps `graphify-out/` (`GRAPH_REPORT.md`, `graph.json`) for any session to use |
 | Has no browser, or a headless one with no logins | Can't check AWS, GCP or Azure consoles, CI dashboards, Grafana, or vendor portals that have no API or CLI | **BrowserOS neo** gives the agent a real local browser with your imported logins, plus session replay for auditing |
 | Describes architecture in text only | Diagrams and runbooks live in Miro, not in the repo, so the agent can't see or update them | **Miro AI** reads boards for context and writes diagrams, docs and tables back to them |
+| Runs `gh` commands one at a time when CI fails | Reads the wrong log, misses the failing step, or "fixes" a test without asking | **GH Fix CI** collects every failing check with its run URL and log snippet, then waits for your approval before changing code |
+| Handles PR feedback from a pasted comment | Misses threads, or changes code nobody asked it to change | **GH Address Comments** fetches every review thread, numbers them, and fixes only the ones you pick |
+| Only knows GitHub through the `gh` CLI | Each lookup is a separate shell command and text parse, and some data (security alerts, cross-repo search) is awkward to reach | **GitHub MCP Server** exposes GitHub as typed tools: issues, PRs, Actions, code search, Dependabot and code-scanning alerts |
 | One-off prompting conventions per engineer | Every engineer gets different output | Shared, versioned skills in this repo give the **same standards across the team** and across agents (Claude, Codex, Cursor) |
 
 ### In short
@@ -74,7 +83,7 @@ A fresh Claude Code, Codex or Cursor install is a capable generalist. But it onl
 - **Safer infrastructure changes.** The skills include guardrails for `apply` and `destroy`, rollback notes, and state-safe refactors.
 - **Consistent code.** Every engineer's agent writes Terraform the same way, so reviews are faster.
 - **Fewer tokens, better answers.** The graph lookups in Graphify replace repeated file reads.
-- **Agents reach where DevOps work happens.** That includes cloud consoles and dashboards (BrowserOS) and architecture boards (Miro), not only the terminal.
+- **Agents reach where DevOps work happens.** That includes cloud consoles and dashboards (BrowserOS) architecture boards (Miro), and GitHub PRs and CI (GitHub skills and MCP), not only the terminal.
 - **Works across agents.** Most of these work with Claude Code, Codex, Cursor and Gemini CLI, so switching agents doesn't mean starting over.
 
 ### Trade-offs to know about
@@ -83,24 +92,27 @@ A fresh Claude Code, Codex or Cursor install is a capable generalist. But it onl
 - Third-party skills change upstream. Read the `SKILL.md` after each update (see [Updating](#updating-and-removing)).
 - BrowserOS neo uses your **real logged-in sessions**. Treat it as privileged access, keep production consoles read-only unless a task needs more, and use session replay to review what the agent did.
 - Miro MCP gets OAuth access to the boards you grant. Grant only the boards you need.
+- The GitHub MCP Server acts with your token's permissions. Use a fine-grained PAT limited to the repos and scopes you need, and never commit it.
 - Graphify's code parsing is fully local. Its semantic pass over docs, PDFs and media uses your assistant's model or a configured API key.
 
 ## Prerequisites
 
 | Tool | Needed for | Install |
 |---|---|---|
-| Node.js 18+ (`npx`) | Skills CLI (skills 1–3, optional Miro skills) | `brew install node` |
+| Node.js 18+ (`npx`) | Skills CLI (skills 1–3 and 7–8, optional Miro skills) | `brew install node` |
 | Python 3.10+ and `uv` (or `pipx`) | Graphify | `brew install uv` |
 | Homebrew (macOS) | BrowserOS neo | [brew.sh](https://brew.sh) |
 | Terraform or OpenTofu | Running what the Terraform skills generate | `brew install hashicorp/tap/terraform` |
 | An AI coding agent | Everything | Claude Code, Codex, Cursor, Gemini CLI… |
 | A Miro account | Miro AI | [miro.com](https://miro.com) |
+| GitHub CLI, authenticated | GH Fix CI, GH Address Comments | `brew install gh && gh auth login` |
+| A GitHub personal access token | GitHub MCP Server | [Create a fine-grained PAT](https://github.com/settings/personal-access-tokens/new) |
 
 ## Setup
 
 ### Quick install (all at once)
 
-The [`scripts/install.sh`](scripts/install.sh) script installs the three Terraform skills, Graphify and BrowserOS neo. It then prints the Miro steps, which you must run inside Claude Code.
+The [`scripts/install.sh`](scripts/install.sh) script installs the three Terraform skills, the two GitHub skills, Graphify and BrowserOS neo. It then prints the Miro and GitHub MCP steps, which need your Claude Code session or a token.
 
 ```bash
 git clone https://github.com/smanley-trekai/devops-hq-agentic-skills.git
@@ -109,6 +121,7 @@ cd devops-hq-agentic-skills
 ./scripts/install.sh terraform  # only the Terraform skills
 ./scripts/install.sh graphify   # only Graphify
 ./scripts/install.sh browseros  # only BrowserOS neo (macOS)
+./scripts/install.sh github     # only the GitHub skills (+ GitHub MCP instructions)
 ```
 
 Or install each one by hand, as shown below.
@@ -353,6 +366,125 @@ Turn this incident runbook into a Miro doc on the SRE board.
 
 Docs: [developers.miro.com/docs/mcp-intro](https://developers.miro.com/docs/mcp-intro)
 
+---
+
+<a id="7-gh-fix-ci-openai"></a>
+
+### <picture><source media="(prefers-color-scheme: dark)" srcset="assets/icons/github-light.svg"><img src="assets/icons/github.svg" width="28" align="center" alt="GitHub"></picture> 7. GH Fix CI (OpenAI)
+
+Debugs failing GitHub Actions checks on a pull request using the `gh` CLI.
+
+**Install**
+
+```bash
+# Option A: skills CLI
+npx skills add openai/skills@gh-fix-ci
+
+# Option B: manual (Claude Code)
+mkdir -p ~/.claude/skills/gh-fix-ci
+curl -o ~/.claude/skills/gh-fix-ci/SKILL.md \
+  https://raw.githubusercontent.com/openai/skills/main/skills/.curated/gh-fix-ci/SKILL.md
+```
+
+> The manual option installs only `SKILL.md`. The skill also ships a helper script (`scripts/inspect_pr_checks.py`), so prefer the skills CLI.
+
+**Set up:** run `gh auth login` and grant the `repo` and `workflow` scopes.
+
+**Use**
+
+From a branch with an open PR:
+
+```text
+CI is failing on my PR. Find out why and propose a fix.
+```
+
+The skill lists each failing check with its name, run URL and a log snippet. Checks that don't run on GitHub Actions are marked as external, with a link only. It drafts a fix plan and **waits for your approval** before changing code, then suggests re-running the tests and `gh pr checks`.
+
+---
+
+<a id="8-gh-address-comments-openai"></a>
+
+### <picture><source media="(prefers-color-scheme: dark)" srcset="assets/icons/github-light.svg"><img src="assets/icons/github.svg" width="28" align="center" alt="GitHub"></picture> 8. GH Address Comments (OpenAI)
+
+Works through review and issue comments on the open PR for your current branch.
+
+**Install**
+
+```bash
+# Option A: skills CLI
+npx skills add openai/skills@gh-address-comments
+
+# Option B: manual (Claude Code)
+mkdir -p ~/.claude/skills/gh-address-comments
+curl -o ~/.claude/skills/gh-address-comments/SKILL.md \
+  https://raw.githubusercontent.com/openai/skills/main/skills/.curated/gh-address-comments/SKILL.md
+```
+
+> As with GH Fix CI, prefer the skills CLI, because the skill ships a helper script (`scripts/fetch_comments.py`).
+
+**Set up:** run `gh auth login`.
+
+**Use**
+
+```text
+Address the review comments on my PR.
+```
+
+The skill fetches every comment and review thread, numbers them with a short summary of each fix, and asks which ones to address. It changes code **only for the comments you pick**.
+
+---
+
+<a id="9-github-mcp-server"></a>
+
+### <picture><source media="(prefers-color-scheme: dark)" srcset="assets/icons/github-light.svg"><img src="assets/icons/github.svg" width="28" align="center" alt="GitHub"></picture> 9. GitHub MCP Server
+
+GitHub's official MCP server. It gives the agent typed tools for repos, issues, pull requests, Actions, code search, and Dependabot and code-scanning alerts. We use the remote server that GitHub hosts, so there's nothing to run locally.
+
+**Install (Claude Code)**
+
+1. [Create a fine-grained personal access token](https://github.com/settings/personal-access-tokens/new) that covers only the repos and permissions you need.
+2. Run this in your terminal (not inside Claude Code), without pasting the token into the command:
+
+```bash
+read -rs GITHUB_PAT   # paste the token, then press Enter
+claude mcp add-json github --scope user \
+  '{"type":"http","url":"https://api.githubcopilot.com/mcp","headers":{"Authorization":"Bearer '"$GITHUB_PAT"'"}}'
+unset GITHUB_PAT
+```
+
+3. Restart Claude Code and check that `github` appears in `/mcp`.
+
+<details>
+<summary>Other agents</summary>
+
+Most MCP clients (Cursor, VS Code, Windsurf, …) accept this config:
+
+```json
+{
+  "mcpServers": {
+    "github": {
+      "url": "https://api.githubcopilot.com/mcp/",
+      "headers": { "Authorization": "Bearer ${GITHUB_PAT}" }
+    }
+  }
+}
+```
+
+For Codex, Claude Desktop, GitHub Enterprise Server, or the local Docker version, see the [installation guides](https://github.com/github/github-mcp-server/tree/main/docs/installation-guides).
+
+</details>
+
+**Use**
+
+```text
+List open PRs in trekai/infra that are waiting on my review.
+Find every workflow in our org that still uses actions/checkout@v3.
+Show open Dependabot alerts for the payments repo, grouped by severity.
+Open an issue for the flaky terraform-plan job and link the last failing run.
+```
+
+> **Tip:** The GitHub skills use the `gh` CLI and the MCP server uses your PAT, so they work independently. Install both: the skills give a guided workflow, and the MCP server covers everything else.
+
 ## How to use them together
 
 Here is a typical TrekAI DevOps flow:
@@ -360,13 +492,15 @@ Here is a typical TrekAI DevOps flow:
 1. **Map the repo:** run `/graphify .` so the agent understands the infrastructure layout without reading every file.
 2. **Find the cause:** ask about the failure. *Terraform Skill* identifies the failure type and plans a safe fix.
 3. **Write or refactor code:** *Terraform Code Generation* writes code that follows the style guide. *Terraform Module Generation* extracts modules and handles state migration.
-4. **Check it live:** the agent uses *BrowserOS neo* to confirm the change in the cloud console or CI dashboard.
-5. **Document it:** the agent updates the architecture diagram or runbook on *Miro*.
+4. **Open the PR and get it green:** if CI fails, *GH Fix CI* finds the failing step. *GH Address Comments* works through reviewer feedback. The *GitHub MCP Server* handles issues, linked runs and searches across repos.
+5. **Check it live:** the agent uses *BrowserOS neo* to confirm the change in the cloud console or CI dashboard.
+6. **Document it:** the agent updates the architecture diagram or runbook on *Miro*.
 
 ## Verify your setup
 
 ```bash
-ls ~/.claude/skills                # Terraform skills appear here (Claude Code, manual install)
+ls ~/.claude/skills                # Terraform and GH skills appear here (Claude Code, manual install)
+gh auth status                     # gh is logged in (needed by the GH skills)
 graphify --help                    # Graphify CLI is on PATH
 brew list --cask browseros-neo     # BrowserOS neo is installed (macOS)
 ```
@@ -375,7 +509,7 @@ Inside Claude Code:
 
 ```text
 /plugin           # "miro" plugin listed
-/mcp              # browseros and miro MCP servers connected
+/mcp              # browseros, miro and github MCP servers connected
 ```
 
 ## Updating and removing
@@ -390,6 +524,9 @@ rm -rf ~/.claude/skills/terraform-skill
 # Graphify
 uv tool upgrade graphifyy        # or: uv tool uninstall graphifyy
 
+# GitHub MCP Server
+claude mcp remove github           # then re-add it with a new token when you rotate the PAT
+
 # BrowserOS neo
 brew upgrade --cask browseros-neo   # or: brew uninstall --cask browseros-neo
 ```
@@ -400,6 +537,6 @@ In Claude Code, use `/plugin` to update or uninstall `miro@miro-ai`.
 
 <p align="center">
   <sub>Maintained by the TrekAI DevOps team. Every skill and tool listed here belongs to its authors and is used under its own license:
-  Terraform Skill (Anton Babenko) · HashiCorp agent-skills (MPL-2.0) · Graphify (Apache-2.0) · BrowserOS (AGPL-3.0) · Miro AI (Miro).
+  Terraform Skill (Anton Babenko) · HashiCorp agent-skills (MPL-2.0) · Graphify (Apache-2.0) · BrowserOS (AGPL-3.0) · Miro AI (Miro) · OpenAI skills (OpenAI) · GitHub MCP Server (GitHub).
   The AgenticSkills logo is a trademark of AgenticSkills.io.</sub>
 </p>
