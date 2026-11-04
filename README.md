@@ -14,6 +14,10 @@
   <sub>Terraform · Codebase knowledge graphs · Browser automation · Miro diagrams</sub>
 </p>
 
+<p align="center">
+  <img src="assets/icons/terraform.svg" height="48" alt="Terraform">&nbsp;&nbsp;&nbsp;<img src="assets/icons/graphify.svg" height="48" alt="Graphify">&nbsp;&nbsp;&nbsp;<img src="assets/icons/browseros-neo.png" height="48" alt="BrowserOS neo">&nbsp;&nbsp;&nbsp;<img src="assets/icons/miro.png" height="48" alt="Miro">
+</p>
+
 ---
 
 > [!IMPORTANT]
@@ -38,14 +42,14 @@
 
 ## The stack at a glance
 
-| # | Skill / Tool | Type | What it does for us | Source |
-|---|---|---|---|---|
-| 1 | **Terraform Skill** | Agent skill | Finds the cause of Terraform and OpenTofu problems first, then gives a fix with validation steps and rollback notes. Enforces safe `plan`/`apply`/`destroy` habits. | [agenticskills.io](https://agenticskills.io/skills/terraform-skill) · [antonbabenko/terraform-skill](https://github.com/antonbabenko/terraform-skill) |
-| 2 | **Terraform Code Generation** | Agent skill | Writes HCL that follows HashiCorp's official style guide: file layout, naming, typed variables, pinned versions, `fmt` and `validate`. | [agenticskills.io](https://agenticskills.io/skills/terraform-code-generation) · [hashicorp/agent-skills](https://github.com/hashicorp/agent-skills/tree/main/plugins/terraform/skills/terraform-style-guide) |
-| 3 | **Terraform Module Generation** | Agent skill | Splits large configurations into reusable modules and migrates state safely with `moved` blocks. | [agenticskills.io](https://agenticskills.io/skills/terraform-module-generation) · [hashicorp/agent-skills](https://github.com/hashicorp/agent-skills/tree/main/plugins/terraform/skills/refactor-module) |
-| 4 | **Graphify** | Skill + CLI | Maps a whole repo (code, docs, configs, schemas, PDFs) into a knowledge graph. The agent queries the graph instead of grepping through files. | [Graphify-Labs/graphify](https://github.com/Graphify-Labs/graphify) |
-| 5 | **BrowserOS neo** | Agentic browser (MCP) | A separate local browser for agents, already signed into your accounts. Agents can work in cloud consoles, dashboards and internal tools. | [browseros-ai/BrowserOS](https://github.com/browseros-ai/BrowserOS) |
-| 6 | **Miro AI** | Plugin + MCP + skills | Lets the agent read and write Miro boards: architecture diagrams, runbooks, specs and code reviews on a board. | [miroapp/miro-ai](https://github.com/miroapp/miro-ai) |
+| # | | Skill / Tool | Type | What it does for us | Source |
+|---|---|---|---|---|---|
+| 1 | <img src="assets/icons/terraform.svg" width="20" align="center" alt="Terraform"> | **Terraform Skill** | Agent skill | Finds the cause of Terraform and OpenTofu problems first, then gives a fix with validation steps and rollback notes. Enforces safe `plan`/`apply`/`destroy` habits. | [agenticskills.io](https://agenticskills.io/skills/terraform-skill) · [antonbabenko/terraform-skill](https://github.com/antonbabenko/terraform-skill) |
+| 2 | <img src="assets/icons/terraform.svg" width="20" align="center" alt="Terraform"> | **Terraform Code Generation** | Agent skill | Writes HCL that follows HashiCorp's official style guide: file layout, naming, typed variables, pinned versions, `fmt` and `validate`. | [agenticskills.io](https://agenticskills.io/skills/terraform-code-generation) · [hashicorp/agent-skills](https://github.com/hashicorp/agent-skills/tree/main/plugins/terraform/skills/terraform-style-guide) |
+| 3 | <img src="assets/icons/terraform.svg" width="20" align="center" alt="Terraform"> | **Terraform Module Generation** | Agent skill | Splits large configurations into reusable modules and migrates state safely with `moved` blocks. | [agenticskills.io](https://agenticskills.io/skills/terraform-module-generation) · [hashicorp/agent-skills](https://github.com/hashicorp/agent-skills/tree/main/plugins/terraform/skills/refactor-module) |
+| 4 | <img src="assets/icons/graphify.svg" width="20" align="center" alt="Graphify"> | **Graphify** | Skill + CLI | Maps a whole repo (code, docs, configs, schemas, PDFs) into a knowledge graph. The agent queries the graph instead of grepping through files. | [Graphify-Labs/graphify](https://github.com/Graphify-Labs/graphify) |
+| 5 | <img src="assets/icons/browseros-neo.png" width="20" align="center" alt="BrowserOS neo"> | **BrowserOS neo** | Agentic browser (MCP) | A separate local browser for agents, already signed into your accounts. Agents can work in cloud consoles, dashboards and internal tools. | [browseros-ai/BrowserOS](https://github.com/browseros-ai/BrowserOS) |
+| 6 | <img src="assets/icons/miro.png" width="20" align="center" alt="Miro"> | **Miro AI** | Plugin + MCP + skills | Lets the agent read and write Miro boards: architecture diagrams, runbooks, specs and code reviews on a board. | [miroapp/miro-ai](https://github.com/miroapp/miro-ai) |
 
 ## Why use these instead of a default agent setup
 
@@ -111,7 +115,9 @@ Or install each one by hand, as shown below.
 
 ---
 
-### 1. Terraform Skill (Anton Babenko)
+<a id="1-terraform-skill-anton-babenko"></a>
+
+### <img src="assets/icons/terraform.svg" width="28" align="center" alt="Terraform"> 1. Terraform Skill (Anton Babenko)
 
 Diagnosis-first guidance for Terraform and OpenTofu, with safety rules for production.
 
@@ -141,7 +147,9 @@ Each answer ends with **assumptions, a validation plan, and rollback notes**.
 
 ---
 
-### 2. Terraform Code Generation (HashiCorp)
+<a id="2-terraform-code-generation-hashicorp"></a>
+
+### <img src="assets/icons/terraform.svg" width="28" align="center" alt="Terraform"> 2. Terraform Code Generation (HashiCorp)
 
 HashiCorp's official Terraform style guide as a skill. Its `SKILL.md` is titled *Terraform Style Guide*.
 
@@ -168,7 +176,9 @@ The output follows the standard layout (`terraform.tf`, `providers.tf`, `main.tf
 
 ---
 
-### 3. Terraform Module Generation (HashiCorp)
+<a id="3-terraform-module-generation-hashicorp"></a>
+
+### <img src="assets/icons/terraform.svg" width="28" align="center" alt="Terraform"> 3. Terraform Module Generation (HashiCorp)
 
 Turns a large Terraform configuration into reusable modules without recreating resources.
 
@@ -209,7 +219,9 @@ moved {
 
 ---
 
-### 4. Graphify
+<a id="4-graphify"></a>
+
+### <img src="assets/icons/graphify.svg" width="28" align="center" alt="Graphify"> 4. Graphify
 
 Turns any codebase, with its docs, SQL schemas, configs and PDFs, into a queryable knowledge graph. Code parsing is local and uses tree-sitter AST, with no vector store.
 
@@ -251,7 +263,9 @@ Docs: [docs.graphify.com](https://docs.graphify.com)
 
 ---
 
-### 5. BrowserOS neo
+<a id="5-browseros-neo"></a>
+
+### <img src="assets/icons/browseros-neo.png" width="28" align="center" alt="BrowserOS neo"> 5. BrowserOS neo
 
 A second, local Chromium-based browser just for your AI agents. It connects over MCP to Claude Code, Codex, Cursor, VS Code and others.
 
@@ -287,7 +301,9 @@ Docs: [docs.browseros.com](https://docs.browseros.com)
 
 ---
 
-### 6. Miro AI
+<a id="6-miro-ai"></a>
+
+### <img src="assets/icons/miro.png" width="28" align="center" alt="Miro"> 6. Miro AI
 
 The official Miro plugin, skills and MCP server. They let agents read and write your Miro boards.
 
