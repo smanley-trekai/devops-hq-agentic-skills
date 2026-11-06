@@ -21,7 +21,7 @@
 ---
 
 > [!IMPORTANT]
-> **Used in TrekAI.** This is the skill stack TrekAI's DevOps team runs with its AI coding agents (Claude Code, Codex, Cursor) for infrastructure work. Each entry below is installed and in use on our machines today. This repo is the place to look before you add something new, and it gets new engineers set up quickly.
+> **Used in TrekAI.** This is the skill stack TrekAI's DevOps team runs with its AI coding agents (Claude Code, Codex, Cursor) for infrastructure work. Each entry in the supported stack below is installed and in use on our machines today. Proposed tools in the roadmap are not yet part of that stack. This repo is the place to look before you add something new, and it gets new engineers set up quickly.
 
 ## Contents
 
@@ -41,6 +41,7 @@
   - [9. GitHub MCP Server](#9-github-mcp-server)
 - [How to use them together](#how-to-use-them-together)
 - [Verify your setup](#verify-your-setup)
+- [Roadmap / Future additions](#roadmap--future-additions)
 - [Updating and removing](#updating-and-removing)
 
 ## The stack at a glance
@@ -607,6 +608,49 @@ Inside Claude Code:
 /mcp              # browseros, miro and github MCP servers connected
 ```
 
+## Roadmap / Future additions
+
+These are **candidates for evaluation**, not approved or installed parts of the supported stack. The links are starting points for review; current capabilities, licensing and compatibility still need verification. Do not add credentials, enable MCP access or install these tools automatically as part of the current setup.
+
+### 1. Secret detection — Gitleaks
+
+- **Candidate:** [Gitleaks](https://github.com/gitleaks/gitleaks).
+- **Gap to address:** accidental secrets in commits, infrastructure code and agent configuration.
+- **Trial:** evaluate pre-commit and CI checks in a disposable repository using synthetic secrets only. Check both staged changes and repository history; confirm a finding fails the check and that a clean fixture passes.
+- **Review:** license, installation prerequisites, false-positive handling and redaction of logs/artifacts. Document credential rotation and incident handling; removing a secret from a file does not revoke it.
+
+### 2. GitHub Actions validation — actionlint
+
+- **Candidate:** [actionlint](https://github.com/rhysd/actionlint).
+- **Gap to address:** workflow mistakes that could be caught before pushing, complementing GH Fix CI.
+- **Trial:** run against representative workflow fixtures, including invalid expressions and valid workflows. Confirm invalid fixtures fail and clean fixtures pass; assess any optional external checkers separately.
+- **Review:** license, runner/platform compatibility, reusable workflows and a pinned installation method. This repository currently has no GitHub Actions workflows, so use fixtures rather than claiming production coverage.
+
+### 3. Infrastructure cost review — Infracost
+
+- **Candidate:** [Infracost](https://github.com/infracost/infracost).
+- **Gap to address:** visibility into estimated cost changes alongside Terraform reviews.
+- **Trial:** compare estimates for a small, non-production Terraform fixture before and after a resource-size change. Identify unsupported resources and costs excluded from the estimate.
+- **Review:** current pricing and license terms, account/API-key requirements, data sent to external services and PR integration permissions. Avoid exposing plan files, state or sensitive values in CI artifacts; estimates are not billing guarantees.
+
+### 4. Terraform reference lookup — Terraform MCP Server
+
+- **Candidate:** [HashiCorp Terraform MCP Server](https://github.com/hashicorp/terraform-mcp-server).
+- **Gap to address:** provider and module reference lookup alongside the existing Terraform skills.
+- **Trial:** verify currently available tools and test provider/module documentation lookup with the team's actual coding agents. Compare answers against the selected provider version's documentation.
+- **Review:** license, supported transports, installation/version pinning, network access and authentication requirements. Prefer a documentation-only, least-privilege configuration where supported; do not enable infrastructure-changing capabilities or supply production credentials for this evaluation.
+
+### Adoption gate
+
+Suggested evaluation order: **Gitleaks → actionlint → Infracost → Terraform MCP Server**. Prioritize deterministic validation before adding another agent integration.
+
+Before promoting any candidate into the supported stack:
+
+1. Verify the current upstream documentation, license, prerequisites, permissions and maintenance status.
+2. Record a reproducible trial: tested version, agent/platform, commands or configuration, expected results, actual results and limitations. Never record secrets.
+3. Have the team approve adoption, or explicitly record the candidate as deferred or rejected with a reason. No candidate is approved yet.
+4. For approved tools only, add setup, usage, verification, update and removal instructions; extend `scripts/install.sh` where appropriate. Keep installation opt-in and pin CI actions or downloaded binaries to reviewed versions.
+
 ## Updating and removing
 
 ```bash
@@ -631,7 +675,7 @@ In Claude Code, use `/plugin` to update or uninstall `miro@miro-ai`.
 ---
 
 <p align="center">
-  <sub>Maintained by the TrekAI DevOps team. Every skill and tool listed here belongs to its authors and is used under its own license:
+  <sub>Maintained by the TrekAI DevOps team. Every skill and tool belongs to its authors. The supported stack is used under each tool's own license:
   Terraform Skill (Anton Babenko) · HashiCorp agent-skills (MPL-2.0) · Graphify (Apache-2.0) · BrowserOS (AGPL-3.0) · Miro AI (Miro) · OpenAI skills (OpenAI) · GitHub MCP Server (GitHub).
   The AgenticSkills logo is a trademark of AgenticSkills.io.</sub>
 </p>
